@@ -1,0 +1,14 @@
+{% if search_list %}
+<span class="dropdown-item-text">Найдено постов: <b>{{ search_list.count }}</b></span>
+<br>
+    {% for object in search_list %}
+    
+        <a class="dropdown-item search-link-post"  href="{% url 'posts:post_detail' object.id %}">
+            <span><b>{{ forloop.counter }}.</b></span>
+            <span class="search-item-name">{{ object.text|truncatechars:30 }}</span>
+        </a>
+
+    {% endfor %}
+{% else %}
+    <p>Посты не найдены</p>
+{% endif %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Об авторе проекта{% endblock %}
+
+{% block content %}
+  <div class="section">
+    <div class="container-box">
+			<div class="content-section">
+				<div class="title">
+					<h1>Привет, я Макс</h1>
+				</div>
+				<div class="content py-5">
+					<p>Тут я размещу информацию о себе используя свои умения верстать.
+            Картинки, блоки, элементы бустрап. А может быть, просто напишу несколько абзацев текста.
+          </p>
+					<div class="button">
+						<a href="">Read More</a>
+					</div>
+				</div>
+				<div class="social">
+					<a href=""><i class="fab fa-facebook-f"></i></a>
+					<a href=""><i class="fab fa-twitter"></i></a>
+					<a href=""><i class="fab fa-instagram"></i></a>
+				</div>
+			</div>
+			<div class="image-section">
+				<img src="{% static 'img/img_one.jpg' %}">
+			</div>
+		</div>
+	</div>
+{% endblock %} 

@@ -1,0 +1,21 @@
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Подтвердите удаление поста</h5>
+      </div>
+      <form method="post" action="{% url "posts:post_delete" post.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          Автор: <b>{{ post.author.get_full_name }}</b>
+          <br>
+          {{ post.text|truncatechars:50 }}
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Отмена</button>
+        <input class="btn btn-danger" type="submit" value="удалить пост">
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 

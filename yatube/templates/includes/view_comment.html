@@ -1,0 +1,20 @@
+<div class="media mb-4">
+  <div class="media-body">
+    {% for comment in comments %}
+      <h5 class="mt-0">
+        <a href="{% url 'posts:profile' comment.author %}">
+          {{ comment.author }}
+        </a>
+      </h5>
+      <p>
+        {{ comment.text }}
+      </p>
+      <p>
+        Дата: {{ comment.created }}
+      </p>
+      {% if not forloop.last %}
+        <hr />
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
