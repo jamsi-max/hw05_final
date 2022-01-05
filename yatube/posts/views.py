@@ -6,8 +6,8 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
-from posts.forms import PostForm, CommentForm
-from posts.models import Post, Follow, Comment
+from posts.forms import CommentForm, PostForm
+from posts.models import Comment, Follow, Post
 from yatube.settings import COUNT_PAGINATOR_PAGE
 
 User = get_user_model()
