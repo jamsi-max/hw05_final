@@ -440,6 +440,6 @@ class PostPagesTests(TestCase):
             response.context['paginator'].page(1).object_list
             | response.context['paginator'].page(2).object_list
         )
-        # проверяем что post автора user_1 не отображается 
+        # проверяем что post автора user_1 не отображается
         # в списке не подписанного на него пользователя
         self.assertFalse(new_post_user_1 in response_post_list)
