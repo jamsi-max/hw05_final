@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
@@ -5,7 +6,6 @@ from django.shortcuts import get_list_or_404, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.contrib import messages
 
 from posts.forms import CommentForm, PostForm
 from posts.models import Follow, Post
