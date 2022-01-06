@@ -60,10 +60,15 @@
 <div class="card my-4">
   <h5 class="card-header">Добавить комментарий:</h5>
   <div class="card-body">
-    <!-- action ведет на обработчик формы  -->
-    {% include 'includes/view_errors.html' %}
+
     <form method="post" action="{% url 'posts:add_comment' post.id %}">
       {% csrf_token %}
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-danger">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
 
       {% include 'includes/view_form.html' %}
 

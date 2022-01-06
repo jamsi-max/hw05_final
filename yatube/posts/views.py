@@ -1,13 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_list_or_404, get_object_or_404
+from django.shortcuts import get_list_or_404, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.contrib import messages
 
 from posts.forms import CommentForm, PostForm
-from posts.models import Comment, Follow, Post
+from posts.models import Follow, Post
 from yatube.settings import COUNT_PAGINATOR_PAGE
 
 User = get_user_model()
@@ -109,8 +110,7 @@ class PostDelete(LoginRequiredMixin, DeleteView):
 
 
 class CommentCreate(LoginRequiredMixin, CreateView):
-    model = Comment
-    template_name = 'posts/profile.html'
+    template_name = 'posts/post_detail.html'
     form_class = CommentForm
     pk_url_kwarg = 'post_id'
 
@@ -120,6 +120,13 @@ class CommentCreate(LoginRequiredMixin, CreateView):
         self.object.post = get_object_or_404(Post, pk=self.kwargs['post_id'])
         self.object.save()
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.add_message(
+            self.request,
+            messages.WARNING,
+            *form.errors.values())
+        return redirect('posts:post_detail', self.kwargs['post_id'])
 
 
 class FollowIndex(LoginRequiredMixin, ListView):
