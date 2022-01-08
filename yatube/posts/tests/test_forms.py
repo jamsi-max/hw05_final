@@ -75,11 +75,6 @@ class PostFormTests(TestCase):
             'group': PostFormTests.group.id,
             'image': uploaded,
         }
-        form_data_create_guest = {
-            'text': 'Не авторизованый тестовый текст поста',
-            'group': PostFormTests.group.id,
-            'image': uploaded,
-        }
 
         # Отправляем POST-запрос
         response = self.authorized_client.post(
@@ -101,6 +96,53 @@ class PostFormTests(TestCase):
         self.assertEqual(form_data_create['text'], new_post.text)
         self.assertEqual(form_data_create['group'], new_post.group.id)
         self.assertEqual(PostFormTests.user, new_post.author)
+
+    def test_delet_post(self):
+        """Пользователь может удалить свой пост."""
+        # Подсчитаем количество записей в Post
+        posts_count = Post.objects.count()
+        # Проверяем что пост может удалить только автор
+        user_no_author = User.objects.create_user(username='userNoAuthor')
+        user_no_author_client = Client()
+        user_no_author_client.force_login(user_no_author)
+        response = user_no_author_client.post(
+            reverse(
+                'posts:post_delete',
+                kwargs={'post_id': PostFormTests.post.id}
+            ),
+            follow=True
+        )
+        self.assertEqual(Post.objects.count(), posts_count)
+        # Удаляем тестовый пост
+        response = self.authorized_client.post(
+            reverse(
+                'posts:post_delete',
+                kwargs={'post_id': PostFormTests.post.id}
+            ),
+            follow=True
+        )
+        # Проверяем статус ответа
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        # Проверяем, сработал ли редирект
+        self.assertRedirects(
+            response,
+            reverse('posts:profile', kwargs={'username': PostFormTests.user})
+        )
+        # Проверяем, удален ли пост
+        self.assertEqual(Post.objects.count(), posts_count - 1)
+
+    def test_no_create_post_guest_client(self):
+        """
+        Не авторизованный клиент не может
+        создаеть запись в Post.
+        """
+        # Подсчитаем количество записей в Post
+        posts_count = Post.objects.count()
+
+        form_data_create_guest = {
+            'text': 'Не авторизованый тестовый текст поста',
+            'group': PostFormTests.group.id,
+        }
 
         # Проверяем что не авторизованый клиент не может создать пост
         response = self.guest_client.post(
@@ -235,6 +277,19 @@ class PostFormTests(TestCase):
         self.assertEqual(form_comments_create['post'], new_comment.post.id)
         self.assertEqual(PostFormTests.user, new_comment.author)
 
+    def test_no_create_comments_guest_client(self):
+        """
+        Валидная форма не создает запись в Comments если клиент не авторизован.
+        """
+        # Подсчитаем количество записей в Comment
+        comments_count = Comment.objects.count()
+
+        form_comments_create = {
+            'text': 'Новый коментарий не авторизованного клиента',
+            'post': PostFormTests.post.id,
+            'author': PostFormTests.user,
+        }
+
         # Проверяем что не авторизованый клиент не может создать коментарий
         response = self.guest_client.post(
             reverse(
@@ -244,8 +299,6 @@ class PostFormTests(TestCase):
             data=form_comments_create,
             follow=True
         )
-        # Проверяем статус ответа
-        self.assertEqual(response.status_code, HTTPStatus.OK)
         # Проверяем, сработал ли редирект
         self.assertRedirects(
             response,
@@ -257,7 +310,7 @@ class PostFormTests(TestCase):
             )
         )
         # Проверяем, что число постов не увеличилось
-        self.assertNotEqual(Post.objects.count(), comments_count + 2)
+        self.assertNotEqual(Post.objects.count(), comments_count)
         # Проверяем что пост не создан
         self.assertFalse(
             Post.objects.filter(

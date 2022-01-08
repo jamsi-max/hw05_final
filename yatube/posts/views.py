@@ -100,6 +100,7 @@ class PostEdit(LoginRequiredMixin, UpdateView):
 class PostDelete(LoginRequiredMixin, DeleteView):
     model = Post
     pk_url_kwarg = 'post_id'
+    template_name = None
 
     def get_success_url(self):
         username = (
@@ -107,6 +108,19 @@ class PostDelete(LoginRequiredMixin, DeleteView):
             .author.username
         )
         return reverse('posts:profile', args=[username])
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        if self.object.author == self.request.user:
+            self.object.delete()
+        return HttpResponseRedirect(success_url)
+
+    def get(self, request, post_id):
+        return HttpResponseRedirect(reverse(
+            'posts:post_detail',
+            args=[post_id])
+        )
 
 
 class CommentCreate(LoginRequiredMixin, CreateView):
@@ -134,9 +148,8 @@ class FollowIndex(LoginRequiredMixin, ListView):
     paginate_by = COUNT_PAGINATOR_PAGE
 
     def get_queryset(self):
-        authors = Follow.objects.filter(user=self.request.user)
         posts = Post.objects.filter(
-            author__in=[author.author.id for author in authors]
+            author__following__user=self.request.user
         )
         return posts
 

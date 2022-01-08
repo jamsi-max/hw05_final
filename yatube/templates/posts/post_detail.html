@@ -43,46 +43,26 @@
       {{ post.text }}
     </p>
     {% if user == post.author %}
-    <a 
-      class="btn btn-primary" 
-      href="{% url "posts:post_edit" post.id %}"
-    >
-      редактировать запись
-    </a>
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal">
-      удалить пост
-    </button>
-    <!-- Button trigger modal -->
+      <a 
+        class="btn btn-primary" 
+        href="{% url "posts:post_edit" post.id %}"
+      >
+        редактировать запись
+      </a>
+
+      <!-- Button trigger modal -->
+      <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal">
+        удалить пост
+      </button>
+      <!-- Button trigger modal -->
+
     {% endif %}
 
-{% if user.is_authenticated %}
-<div class="card my-4">
-  <h5 class="card-header">Добавить комментарий:</h5>
-  <div class="card-body">
+    <!-- добавление коментариев -->
+    {% include 'includes/add_comment.html' %}
 
-    <form method="post" action="{% url 'posts:add_comment' post.id %}">
-      {% csrf_token %}
-
-        {% if messages %}
-          {% for message in messages %}
-            <div class="alert alert-danger">{{ message }}</div>
-          {% endfor %}
-        {% endif %}
-
-      {% include 'includes/view_form.html' %}
-
-      <div class="col-md-6 offset-md-4">
-        <button type="submit" class="btn btn-primary">
-          Отправить
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-{% endif %}
-<!-- комментарии перебираются в цикле  -->
-{% include 'includes/view_comment.html' %}
+    <!-- отображение комментариев  -->
+    {% include 'includes/view_comment.html' %}
 
   </article>
 </div>

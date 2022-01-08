@@ -54,6 +54,10 @@ class Group(models.Model):
     slug = models.SlugField(max_length=200, unique=True)
     description = models.TextField()
 
+    class Meta:
+        verbose_name = 'Группы'
+        verbose_name_plural = 'Группы'
+
     def __str__(self):
         return self.title
 
@@ -119,6 +123,16 @@ class Follow(CreatedModel):
         related_name='following',
         verbose_name='Автор'
     )
+
+    class Meta:
+        verbose_name = 'Подписчики'
+        verbose_name_plural = 'Подписчики'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_bundle_user_author'
+            )
+        ]
 
     def get_absolute_url(self):
         return reverse('posts:follow_index')

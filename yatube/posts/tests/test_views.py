@@ -299,17 +299,21 @@ class PostPagesTests(TestCase):
         )
 
     # Авторизованный пользователь может подписываться на других
-    def test_authorized_client_can_subscribe_and_unsubscribe(self):
+    def test_authorized_client_can_subscribe(self):
         """
         Обработчик ProfileFollow создает запись на автора
         если клиент авторизован
         """
+        # Подсчитаем количество подписок
+        follow_count = self.user.follower.all().count()
         response = self.authorized_client.get(
             reverse(
                 'posts:profile_follow',
                 kwargs={'username': PostPagesTests.user_1.username}
             )
         )
+        # Проверяем что количество подписок увеличилось
+        self.assertEqual(self.user.follower.all().count(), follow_count + 1)
         # Проверяем создалась ли запись
         self.assertTrue(
             Follow.objects.filter(
@@ -328,17 +332,12 @@ class PostPagesTests(TestCase):
         Обработчик ProfileUnfollow удаляет запись на автора
         если клиент авторизован
         """
-        # Подсчитаем количество записей в Follow
-        follow_count = Follow.objects.count()
+        # Подсчитаем количество подписок
+        follow_count = self.user.follower.all().count()
         # Создаем подписку
-        response = self.authorized_client.get(
-            reverse(
-                'posts:profile_follow',
-                kwargs={'username': PostPagesTests.user_2.username}
-            )
-        )
+        Follow.objects.create(user=self.user, author=PostPagesTests.user_2)
         # Проверяем что количество записей увеличилось
-        self.assertEqual(Follow.objects.count(), follow_count + 1)
+        self.assertEqual(self.user.follower.all().count(), follow_count + 1)
         # Отписываемся от атора
         response = self.authorized_client.get(
             reverse(
@@ -347,7 +346,7 @@ class PostPagesTests(TestCase):
             )
         )
         # Проверяем что количество записей уменьшилось
-        self.assertEqual(Follow.objects.count(), follow_count)
+        self.assertEqual(self.user.follower.all().count(), follow_count)
         # Проверяем что удалена именно наша подписка
         self.assertFalse(
             Follow.objects.filter(
@@ -381,7 +380,11 @@ class PostPagesTests(TestCase):
         self.assertRedirects(
             response,
             reverse('users:login')
-            + f'?next=/profile/{PostPagesTests.user_2.username}/follow/'
+            + '?next='
+            + reverse(
+                'posts:profile_follow',
+                kwargs={'username': PostPagesTests.user_2.username}
+            )
         )
 
     # Новая запись появляется в ленте только у подписчиков
@@ -398,7 +401,7 @@ class PostPagesTests(TestCase):
             )
         )
         # создаем новую запись автором на которого подписались
-        new_post_user_1 = Post.objects.create(
+        Post.objects.create(
             text='Для ленты подписчиков проверка',
             author=PostPagesTests.user_1
         )
@@ -419,17 +422,24 @@ class PostPagesTests(TestCase):
             response_post_list,
             transform=lambda x: x)
 
-        # проверяем что запись не появилась в ленте у неподписанного
+    # Проверяем что у неподписчика новая запись не отображается
+    def test_new_post_no_view_not_subscriber(self):
+        # проверяем что запись не появится в ленте у неподписанного
         # пользователя создаем нового клиента
         new_follower = User.objects.create_user(username='NewFollower')
         authorized_client = Client()
         authorized_client.force_login(new_follower)
-        # подписываемся на другого автора
+        # подписываемся на автора
         authorized_client.get(
             reverse(
                 'posts:profile_follow',
                 kwargs={'username': PostPagesTests.user_2.username}
             )
+        )
+        # создаем запись автором на которого не подписаны
+        new_post_user_1 = Post.objects.create(
+            text='Для ленты подписчиков проверка',
+            author=PostPagesTests.user_1
         )
         # получаем все посты автора user_2
         response = authorized_client.get(
